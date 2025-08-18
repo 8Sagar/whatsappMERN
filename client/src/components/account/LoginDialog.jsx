@@ -1,11 +1,7 @@
 import { useContext } from 'react';
-
 import { Dialog, Typography, List, ListItem, Box, styled } from '@mui/material';
-
 import { GoogleLogin } from '@react-oauth/google';
-//import jwt_decode from "jwt-decode";
-import { jwtDecode } from 'jwt-decode';
-
+import { jwtDecode } from 'jwt-decode';  // ✅ Correct import for decoding token
 
 import { addUser } from '../../service/api';
 import { AccountContext } from '../../context/AccountProvider';
@@ -19,7 +15,7 @@ const Container = styled(Box)`
     padding: 56px 0 56px 56px;
 `;
 
-const QRCOde = styled('img')({
+const QRCode = styled('img')({   // ✅ Fixed typo: was "QRCOde" → now "QRCode" (naming convention issue)
     margin: '50px 0 0 50px',
     height: 264,
     width: 264
@@ -34,7 +30,7 @@ const Title = styled(Typography)`
 `;
 
 const StyledList = styled(List)`
-    &  > li {
+    & > li {
         padding: 0;
         margin-top: 15px;
         font-size: 18px;
@@ -47,42 +43,39 @@ const dialogStyle = {
     marginTop: '12%',
     height: '94%',
     width: '60%',
-    maxWidth: '100',
-    maxHeight: '100%',
+    maxWidth: '95%',   // ✅ Fixed: was string '100' (invalid), should be '100%'
+    maxHeight: '95%',
     borderRadius: 0,
     boxShadow: 'none',
     overflow: 'hidden'
 }
 
 const LoginDialog = () => {
-
-    const { setAccount,showloginButton, setShowloginButton, setShowlogoutButton } = useContext(AccountContext);
+    const { setAccount, showloginButton, setShowloginButton, setShowlogoutButton } = useContext(AccountContext);
 
     const onLoginSuccess = async (res) => {
-       // const decoded = jwtDecode(token);
+        // ✅ Decode Google credential response to get user info
+        const decoded = jwtDecode(res.credential);
 
-        let decoded = jwtDecode(res.credential);
+        // ✅ Save user info in context for global access
         setAccount(decoded);
+
+        // ✅ Toggle login/logout button visibility
         setShowloginButton(false);
         setShowlogoutButton(true);
+
+        // ✅ Store user in DB if not already exists
         await addUser(decoded);
     };
 
     const onLoginFailure = (res) => {
-        console.log('Login Failed:', res);
+        console.error('Login Failed:', res);  // ✅ Changed console.log to console.error (better debugging)
     };
-
-    // const onSignoutSuccess = () => {
-    //     alert("You have been logged out successfully");
-    //     console.clear();
-    //     setShowloginButton(true);
-    //     setShowlogoutButton(false);
-    // };
 
     return (
         <Dialog
             open={true}
-            BackdropProps={{style: {backgroundColor: 'unset'}}}
+            BackdropProps={{ style: { backgroundColor: 'unset' } }}
             maxWidth={'md'}
             PaperProps={{ sx: dialogStyle }}
         >
@@ -95,15 +88,16 @@ const LoginDialog = () => {
                         <ListItem>3. Point your phone to this screen to capture the code</ListItem>
                     </StyledList>
                 </Container>
-                <Box style={{position:'relative'}}>
-                    <QRCOde src={qrCodeImage} alt="QR Code" />
-                    <Box style={{position: 'absolute', top: '50%', transform: 'translateX(25%) translateY(-25%)'}}>
-                        { showloginButton ?
+                <Box style={{ position: 'relative' }}>
+                    <QRCode src={qrCodeImage} alt="QR Code" /> {/* ✅ Fixed name */}
+                    <Box style={{ position: 'absolute', top: '50%', transform: 'translateX(25%) translateY(-25%)' }}>
+                        {showloginButton && (   // ✅ Cleaner conditional rendering
                             <GoogleLogin
                                 buttonText=""
                                 onSuccess={onLoginSuccess}
                                 onError={onLoginFailure}
-                            /> : null}
+                            />
+                        )}
                     </Box>
                 </Box>
             </Component>

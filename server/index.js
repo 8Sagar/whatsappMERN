@@ -35,9 +35,6 @@ import dotenv from 'dotenv';
 import Connection from './database/db.js';
 import Routes from './routes/Routes.js';
 
-import userRoutes from './routes/userRoute.js';
-
-
 
 dotenv.config();
 const app = express();
@@ -55,7 +52,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes
 app.use('/', Routes);
 
-app.use("/users", userRoutes);
 // Database connection
 Connection(username, password);
 

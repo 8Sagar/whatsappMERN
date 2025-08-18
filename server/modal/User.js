@@ -2,12 +2,10 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
     aud: {
-        type: String,
-        required: true
+        type: String
     },
     azp: {
-        type: String,
-        required: true
+        type: String
     },
     email: {
         type: String,
@@ -18,28 +16,27 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     exp: {
-        type: Number,
-        required: true
+        type: Number
     },
     family_name: {
-        type: String,
-        required: true
+        type: String
+        
     },
     given_name: {
-        type: String,
-        required: true
+        type: String
+    
     },
     iat: {
-        type: Number,
-        required: true
+        type: Number
+        
     },
     iss: {
-        type: String,
-        required: true
+        type: String
+        
     },
     jti: {
-        type: String,
-        required: true
+        type: String
+        
     },
     name: {
         type: String,
@@ -47,18 +44,22 @@ const userSchema = new mongoose.Schema({
     },
     nbf: {
         type: Number,
-        required: true
+        
     },
     picture: {
         type: String,
-        required: true
+        required:true
+        
     },
     sub: {
         type: String,
-        required: true
+        required: true,
+        unique : true
     }
 })
 
-const user = mongoose.model('user', userSchema);
+//const user = mongoose.model('user', userSchema);
+const user = mongoose.models.user || mongoose.model('user', userSchema);
 
-export default user;
+export default user; 
+

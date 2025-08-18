@@ -2,10 +2,8 @@ import { useState, useEffect, useContext } from 'react';
 import { Box, styled, Divider } from '@mui/material';
 
 import { AccountContext } from '../../../context/AccountProvider';
-import { UserContext } from '../../../context/UserProvider';
-import { getUsers } from '../../../service/api';
-import Loader from '../../Loader';
 import Conversation from './Conversation';
+import { getUsers } from '../../../service/api';
 
 const Component = styled(Box)`
     overflow: overlay;
@@ -20,61 +18,52 @@ const StyledDivider = styled(Divider)`
 
 const Conversations = ({ text }) => {
     const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(false);
-
+    
     const { account, socket, setActiveUsers } = useContext(AccountContext);
-    const { setPerson } = useContext(UserContext);
 
-    // Fetch users from backend
+    // Fetch users and filter based on search text
     useEffect(() => {
         const fetchData = async () => {
-            if (!account?.email) return;
-            setLoading(true);
-            try {
-                const data = await getUsers(account.email); // backend route /users/all/:email
-                if (Array.isArray(data)) {
-                    const filteredData = data.filter(user =>
-                        user.name?.toLowerCase().includes(text.toLowerCase())
-                    );
-                    setUsers(filteredData);
-                } else {
-                    setUsers([]);
-                    console.error("getUsers() did not return an array", data);
-                }
-            } catch (err) {
-                console.error("Error fetching users:", err);
-                setUsers([]);
-            }
-            setLoading(false);
+            const data = await getUsers();
+            const filteredData = data.filter(user =>
+                user.name.toLowerCase().includes(text.toLowerCase())
+            );
+            setUsers(filteredData);
+        };
+        fetchData();
+    }, [text]);
+
+    // Socket: add user and listen for active users
+    useEffect(() => {
+        if (!socket.current) return;
+
+        const currentSocket = socket.current; // copy ref for safe cleanup
+
+        currentSocket.emit('addUser', account);
+
+        const handleGetUsers = (users) => {
+            setActiveUsers(users);
         };
 
-        fetchData();
-    }, [text, account]);
+        currentSocket.on("getUsers", handleGetUsers);
 
-    // Socket: add user & track active users
-    useEffect(() => {
-        if (!account) return;
-
-        socket.current.emit('addUser', account);
-        socket.current.on('getUsers', (users) => {
-            setActiveUsers(users);
-        });
-
-        return () => socket.current.off('getUsers'); // cleanup
+        // Cleanup listener on unmount or account change
+        return () => {
+            currentSocket.off("getUsers", handleGetUsers);
+        };
     }, [account, socket, setActiveUsers]);
-
-    if (loading) return <Loader />;
 
     return (
         <Component>
-            {users.map((user, index) => (
-                <div key={user._id} onClick={() => setPerson(user)}>
-                    <Conversation user={user} />
-                    {users.length !== index + 1 && <StyledDivider />}
-                </div>
+            {users && users.map((user, index) => (
+                user.sub !== account.sub &&
+                    <Box key={user.sub}>
+                        <Conversation user={user} />
+                        {users.length !== (index + 1) && <StyledDivider />}
+                    </Box>
             ))}
         </Component>
     );
-};
+}
 
 export default Conversations;

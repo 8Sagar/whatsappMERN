@@ -1,14 +1,13 @@
   
 import axios from 'axios';
-
-const url = 'http://localhost:8000';
+const url = "http://localhost:8000";
 
 export const addUser = async (data) => {
-    try {
+    try {      
         let response = await axios.post(`${url}/add`, data);
         return response.data;
     } catch (error) {
-        console.log('Error while calling addUser API ', error);
+        console.log('Error while calling addUser API ', error.message);
     }
 }
 
@@ -19,7 +18,20 @@ export const getUsers = async () => {
     } catch (error) {
         console.log('Error while calling getUsers API ', error);
     }
-}
+}  
+
+// this get User code from chatgpt to solve array problem
+
+// export const getUsers = async () => {
+//     try {
+//         let response = await axios.get(`${url}/users`);
+//         return response.data;
+//     } catch (error) {
+//         console.log("Error while calling getUsers API", error);
+//         return []; // ✅ always return an array
+//     }
+// }
+
 
 export const setConversation = async (data) => {
     try {
