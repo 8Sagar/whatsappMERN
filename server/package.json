@@ -5,7 +5,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "render-preinstall": "npm install --legacy-peer-deps"
+
   },
   "author": "",
   "license": "ISC",
